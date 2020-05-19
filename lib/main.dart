@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:rental_app/Models/AppConstants.dart';
+import 'package:hotel_hunter_app/Models/AppConstants.dart';
+import 'package:hotel_hunter_app/Screens/login_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +18,9 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(),
+      routes: {
+        LoginPage.routeName: (context) => LoginPage(),
+      },
     );
   }
 }
@@ -27,6 +33,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  @override
+  void initState() {
+    
+    Timer(Duration(seconds: 2), () {
+      Navigator.pushNamed(context, LoginPage.routeName);
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
