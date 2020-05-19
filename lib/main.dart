@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/AppConstants.dart';
 import 'package:hotel_hunter_app/Screens/login_page.dart';
+import 'package:hotel_hunter_app/Screens/signup_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(),
       routes: {
         LoginPage.routeName: (context) => LoginPage(),
+        SignupPage.routeName: (context) => SignupPage(),
       },
     );
   }
