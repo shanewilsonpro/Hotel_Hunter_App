@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
+import 'package:hotel_hunter_app/Views/text_widgets.dart';
 
 class SignupPage extends StatefulWidget {
   static final String routeName = '/signup_pageRoute';
@@ -10,17 +12,15 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+
+  void _signup() {
+    Navigator.pushNamed(context, GuestHomePage.routeName);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Sign Up Page',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20.0,
-          ),
-        ),
+        title: AppBarText(text: 'Sign Up Page'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -91,7 +91,9 @@ class _SignupPageState extends State<SignupPage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 40.0, bottom: 40.0),
                   child: MaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _signup();
+                    },
                     child: Text(
                       'Submit',
                       style: TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/AppConstants.dart';
+import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,6 +16,10 @@ class _LoginPageState extends State<LoginPage> {
 
   void _signup() {
     Navigator.pushNamed(context, SignupPage.routeName);
+  }
+
+  void _login() {
+    Navigator.pushNamed(context, GuestHomePage.routeName);
   }
 
   @override
@@ -62,7 +67,9 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 30.0),
                 child: MaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _login();
+                  },
                   child: Text(
                     'Login',
                     style: TextStyle(
