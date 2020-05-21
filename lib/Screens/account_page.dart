@@ -1,6 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Screens/login_page.dart';
+import 'package:hotel_hunter_app/Screens/personal_info_page.dart';
+import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
 
 class AccountPage extends StatefulWidget {
   AccountPage({Key key}) : super(key: key);
@@ -28,7 +30,9 @@ class _AccountPageState extends State<AccountPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 MaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, ViewProfilePage.routeName);
+                  },
                   child: CircleAvatar(
                     backgroundColor: Colors.black,
                     radius: MediaQuery.of(context).size.width / 9.5,
@@ -68,7 +72,9 @@ class _AccountPageState extends State<AccountPage> {
             children: <Widget>[
               MaterialButton(
                 height: MediaQuery.of(context).size.height / 9.0,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, PersonalInfoPage.routeName);
+                },
                 child: AccountPageListTile(
                   text: 'Personal Information',
                   iconData: Icons.person,
