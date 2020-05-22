@@ -1,6 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
+import 'package:hotel_hunter_app/Views/form_widget.dart';
+import 'package:hotel_hunter_app/Views/list_widgets.dart';
 import 'package:hotel_hunter_app/Views/text_widgets.dart';
 
 class ViewProfilePage extends StatefulWidget {
@@ -113,8 +115,21 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
                 ),
               ),
               Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: ReviewForm(),
+              ),
+              Padding(
                 padding: const EdgeInsets.only(top: 25.0),
-                child: Container(),
+                child: ListView.builder(
+                  itemCount: 2,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                      child: ReviewListTile(),
+                    );
+                  },
+                ),
               ),
             ],
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hotel_hunter_app/Models/AppConstants.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Screens/account_page.dart';
 import 'package:hotel_hunter_app/Screens/explore_page.dart';
 import 'package:hotel_hunter_app/Screens/inbox_page.dart';
