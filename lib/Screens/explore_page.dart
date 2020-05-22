@@ -17,7 +17,7 @@ class _ExplorePageState extends State<ExplorePage> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(bottom: 50.0),
+              padding: const EdgeInsets.only(top: 10, bottom: 50.0),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search',
@@ -37,16 +37,18 @@ class _ExplorePageState extends State<ExplorePage> {
               ),
             ),
             GridView.builder(
-                shrinkWrap: true,
-                itemCount: 3,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                    childAspectRatio: 3 / 4),
-                itemBuilder: (context, index) {
-                  return PostingGridTile();
-                }),
+              physics: ScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: 3,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  childAspectRatio: 3 / 4),
+              itemBuilder: (context, index) {
+                return PostingGridTile();
+              },
+            ),
           ],
         ),
       ),

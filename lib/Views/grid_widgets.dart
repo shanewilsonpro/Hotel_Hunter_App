@@ -59,3 +59,59 @@ class _PostingGridTileState extends State<PostingGridTile> {
     );
   }
 }
+
+class TripGridTile extends StatefulWidget {
+  TripGridTile({Key key}) : super(key: key);
+
+  @override
+  _TripGridTileState createState() => _TripGridTileState();
+}
+
+class _TripGridTileState extends State<TripGridTile> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        AspectRatio(
+          aspectRatio: 3 / 2,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/apartment.jpg'),
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+        ),
+        AutoSizeText(
+          'Awesome Apartment',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
+        AutoSizeText(
+          'Apartment - Los Angeles, CA',
+          style: TextStyle(
+            fontSize: 14,
+          ),
+        ),
+        Text('\$120 / night'),
+        Text(
+          'August 10, 2019 -',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          'August 12, 2019',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
