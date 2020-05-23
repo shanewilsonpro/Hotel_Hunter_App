@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hotel_hunter_app/Screens/book_posting_page.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
+import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
 import 'package:hotel_hunter_app/Views/form_widget.dart';
 import 'package:hotel_hunter_app/Views/list_widgets.dart';
 import 'package:hotel_hunter_app/Views/text_widgets.dart';
@@ -95,7 +97,12 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
                         children: <Widget>[
                           MaterialButton(
                             color: Colors.redAccent,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                BookPostingPage.routeName,
+                              );
+                            },
                             child: Text(
                               'Book now',
                               style: TextStyle(
@@ -134,10 +141,19 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
                             CircleAvatar(
                               radius: MediaQuery.of(context).size.width / 12.5,
                               backgroundColor: Colors.black,
-                              child: CircleAvatar(
-                                backgroundImage: AssetImage(
-                                    'assets/images/profile_demo.jpg'),
-                                radius: MediaQuery.of(context).size.width / 13,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    ViewProfilePage.routeName,
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  backgroundImage: AssetImage(
+                                      'assets/images/profile_demo.jpg'),
+                                  radius:
+                                      MediaQuery.of(context).size.width / 13,
+                                ),
                               ),
                             ),
                             Padding(
@@ -225,22 +241,21 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
                     child: Container(
                       height: MediaQuery.of(context).size.height / 3,
                       child: GoogleMap(
-                        onMapCreated: (controller) {
-                          _completer.complete(controller);
-                        },
-                        mapType: MapType.normal,
-                        initialCameraPosition: CameraPosition(
-                          target: _centerLatLong,
-                          zoom: 14,
-                        ),
-                        markers: <Marker> {
-                          Marker(
-                            markerId: MarkerId('Home Location'),
-                            position: _centerLatLong,
-                            icon: BitmapDescriptor.defaultMarker,
-                          )
-                        }
-                      ),
+                          onMapCreated: (controller) {
+                            _completer.complete(controller);
+                          },
+                          mapType: MapType.normal,
+                          initialCameraPosition: CameraPosition(
+                            target: _centerLatLong,
+                            zoom: 14,
+                          ),
+                          markers: <Marker>{
+                            Marker(
+                              markerId: MarkerId('Home Location'),
+                              position: _centerLatLong,
+                              icon: BitmapDescriptor.defaultMarker,
+                            )
+                          }),
                     ),
                   ),
                   Text(
