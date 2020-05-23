@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Views/grid_widgets.dart';
 
 class SavedPage extends StatefulWidget {
@@ -25,7 +26,16 @@ class _SavedPageState extends State<SavedPage> {
         itemBuilder: (context, index) {
           return Stack(
             children: <Widget>[
-              PostingGridTile(),
+              InkResponse(
+                enableFeedback: true,
+                child: PostingGridTile(),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    ViewPostingPage.routeName,
+                  );
+                },
+              ),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(

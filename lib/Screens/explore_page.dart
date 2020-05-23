@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Views/grid_widgets.dart';
 
 class ExplorePage extends StatefulWidget {
@@ -46,7 +47,16 @@ class _ExplorePageState extends State<ExplorePage> {
                   mainAxisSpacing: 15,
                   childAspectRatio: 3 / 4),
               itemBuilder: (context, index) {
-                return PostingGridTile();
+                return InkResponse(
+                  enableFeedback: true,
+                  child: PostingGridTile(),
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      ViewPostingPage.routeName,
+                    );
+                  },
+                );
               },
             ),
           ],

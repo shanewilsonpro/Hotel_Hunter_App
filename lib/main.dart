@@ -6,6 +6,7 @@ import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'package:hotel_hunter_app/Screens/login_page.dart';
 import 'package:hotel_hunter_app/Screens/personal_info_page.dart';
 import 'package:hotel_hunter_app/Screens/signup_page.dart';
+import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
 
 void main() {
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         GuestHomePage.routeName: (context) => GuestHomePage(),
         PersonalInfoPage.routeName: (context) => PersonalInfoPage(),
         ViewProfilePage.routeName: (context) => ViewProfilePage(),
+        ViewPostingPage.routeName: (context) => ViewPostingPage(),
       },
     );
   }
