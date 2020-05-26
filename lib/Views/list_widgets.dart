@@ -165,7 +165,7 @@ class MessageListTile extends StatelessWidget {
           ),
         ],
       ),
-    ); 
+    );
     /*return Padding(
       padding: const EdgeInsets.fromLTRB(35, 15, 15, 15),
       child: Row(
@@ -224,5 +224,64 @@ class MessageListTile extends StatelessWidget {
         ],
       ),
     ); */
+  }
+}
+
+class MyPostingListTile extends StatefulWidget {
+  MyPostingListTile({Key key}) : super(key: key);
+
+  @override
+  _MyPostingListTileState createState() => _MyPostingListTileState();
+}
+
+class _MyPostingListTileState extends State<MyPostingListTile> {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.all(10.0),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 5.0),
+        child: AutoSizeText(
+          'Awesome Apartment',
+          maxLines: 2,
+          minFontSize: 17.0,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      trailing: AspectRatio(
+        aspectRatio: 3 / 2,
+        child: Image(
+          image: AssetImage('assets/images/apartment.jpg'),
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    );
+  }
+}
+
+class CreatePostingListTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height / 12,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 15.0),
+            child: Icon(Icons.add),
+          ),
+          Text(
+            'Create a posting',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20.0,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

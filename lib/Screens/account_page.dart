@@ -1,5 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
+import 'package:hotel_hunter_app/Screens/host_home_page.dart';
 import 'package:hotel_hunter_app/Screens/login_page.dart';
 import 'package:hotel_hunter_app/Screens/personal_info_page.dart';
 import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
@@ -12,8 +15,37 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  String _hostingTitle = 'To Host Dashboard';
+
   void _logout() {
     Navigator.pushNamed(context, LoginPage.routeName);
+  }
+
+  void _changeHosting() {
+    if (AppConstants.isHosting) {
+      AppConstants.isHosting = false;
+      Navigator.pushNamed(
+        context,
+        GuestHomePage.routeName,
+      );
+    } else {
+      AppConstants.isHosting = true;
+      Navigator.pushNamed(
+        context,
+        HostHomePage.routeName,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    if (AppConstants.isHosting) {
+      _hostingTitle = 'To Guest Dashboard';
+    } else {
+      _hostingTitle = 'To Host Dashboard';
+    }
+
+    super.initState();
   }
 
   @override
@@ -82,9 +114,9 @@ class _AccountPageState extends State<AccountPage> {
               ),
               MaterialButton(
                 height: MediaQuery.of(context).size.height / 9.0,
-                onPressed: () {},
+                onPressed: _changeHosting,
                 child: AccountPageListTile(
-                  text: 'Become a Host',
+                  text: _hostingTitle,
                   iconData: Icons.hotel,
                 ),
               ),
