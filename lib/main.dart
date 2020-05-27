@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Screens/book_posting_page.dart';
 import 'package:hotel_hunter_app/Screens/conversation_page.dart';
+import 'package:hotel_hunter_app/Screens/create_posting_page.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'package:hotel_hunter_app/Screens/host_home_page.dart';
 import 'package:hotel_hunter_app/Screens/login_page.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         BookPostingPage.routeName: (context) => BookPostingPage(),
         ConversationPage.routeName: (context) => ConversationPage(),
         HostHomePage.routeName: (context) => HostHomePage(),
+        CreatePostingPage.routeName: (context) => CreatePostingPage(),
       },
     );
   }
