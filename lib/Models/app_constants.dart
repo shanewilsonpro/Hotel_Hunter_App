@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/user_objects.dart';
 
 class AppConstants {
   static final String appName = 'Hotel Hunter';
@@ -7,6 +8,7 @@ class AppConstants {
   static final Color selectedIconColor = Colors.deepOrange;
   static final Color nonSelectedIconColor = Colors.black;
 
+  static User currentUser;
   static bool isHosting = false;
 
   static final Map<int, String> monthDict = {
