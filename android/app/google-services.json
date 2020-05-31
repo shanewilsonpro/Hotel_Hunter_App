@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "303529471025",
+    "firebase_url": "https://hotel-hunter-cd50a.firebaseio.com",
+    "project_id": "hotel-hunter-cd50a",
+    "storage_bucket": "hotel-hunter-cd50a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303529471025:android:6f0266b46dfebdf843f910",
+        "android_client_info": {
+          "package_name": "com.example.rentalApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "303529471025-62d9hdcljkn4rcvgv1029lib56kieen8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq-XMCWhQgWy9qF1NW5TcJLS9zx5GQOrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "303529471025-62d9hdcljkn4rcvgv1029lib56kieen8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "303529471025-1l8tprpt8jtst0k7ofbohbte67ik4ld6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rentalApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

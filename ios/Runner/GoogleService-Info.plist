@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>303529471025-1l8tprpt8jtst0k7ofbohbte67ik4ld6.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.303529471025-1l8tprpt8jtst0k7ofbohbte67ik4ld6</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDRhdnzYDs0MmzZUYEeN1seAbaYB8LioGA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>303529471025</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.rentalApp</string>
+	<key>PROJECT_ID</key>
+	<string>hotel-hunter-cd50a</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hotel-hunter-cd50a.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:303529471025:ios:a8e784e3bfd147c243f910</string>
+	<key>DATABASE_URL</key>
+	<string>https://hotel-hunter-cd50a.firebaseio.com</string>
+</dict>
+</plist>

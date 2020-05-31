@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/messaging_objects.dart';
 import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Models/review_objects.dart';
 
@@ -36,6 +37,8 @@ class User extends Contact {
 
   List<Booking> bookings;
   List<Review> reviews;
+  List<Conversation> conversations;
+  List<Posting> savedPostings;
 
   User(
       {String firstName = "",
@@ -50,6 +53,8 @@ class User extends Contact {
     this.isCurrentlyHosting = false;
     this.bookings = [];
     this.reviews = [];
+    this.conversations = [];
+    this.savedPostings = [];
   }
 
   void changeCurrentlyHosting(bool isHosting) {
@@ -71,6 +76,18 @@ class User extends Contact {
 
   void makeNewBooking(Booking booking) {
     this.bookings.add(booking);
+  }
+
+  void addSavedPosting(Posting posting) {
+    this.savedPostings.add(posting);
+  }
+
+  void removeSavedPosting(Posting posting) {
+    for (int i = 0; i < this.savedPostings.length; i++) {
+      if (this.savedPostings[i].name == posting.name) {
+        this.savedPostings.removeAt(1);
+      }
+    }
   }
 
   double getCurrentRating() {
