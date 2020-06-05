@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/user_objects.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   static final String routeName = '/login_pageRoute';
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   LoginPage({Key key}) : super(key: key);
 
@@ -13,13 +16,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
   void _signup() {
     Navigator.pushNamed(context, SignupPage.routeName);
   }
 
   void _login() {
-    Navigator.pushNamed(context, GuestHomePage.routeName);
+    if (_formKey.currentState.validate()) {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      ).then((firebaseUser) {
+        String userID = firebaseUser.user.uid;
+        User user = User();
+        user.id = userID;
+
+        Navigator.pushNamed(context, GuestHomePage.routeName);
+      });
+    }
   }
 
   @override
@@ -40,16 +60,23 @@ class _LoginPageState extends State<LoginPage> {
                 textAlign: TextAlign.center,
               ),
               Form(
+                key: _formKey,
                 child: Column(
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.only(top: 35.0),
                       child: TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Username/email'),
+                        decoration: InputDecoration(labelText: 'Email'),
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
+                        validator: (text) {
+                          if (!text.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                        controller: _emailController,
                       ),
                     ),
                     Padding(
@@ -59,6 +86,14 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: 25.0,
                         ),
+                        obscureText: true,
+                        validator: (text) {
+                          if (text.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                        controller: _passwordController,
                       ),
                     )
                   ],

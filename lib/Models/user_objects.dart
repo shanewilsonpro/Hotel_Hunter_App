@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Models/messaging_objects.dart';
@@ -5,13 +7,25 @@ import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Models/review_objects.dart';
 
 class Contact {
+  String id;
   String firstName;
   String lastName;
-  String imagePath;
-  AssetImage displayImage;
+  MemoryImage displayImage;
 
-  Contact({this.firstName = "", this.lastName = "", this.imagePath = ""}) {
-    this.displayImage = AssetImage(this.imagePath);
+  Contact({this.id = "", this.firstName = "", this.lastName = "", this.displayImage});
+
+  Future<void> getContactInfoFromFirestore() async {
+    DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(id).get();
+    this.firstName = snapshot['firstName'] ?? "";
+    this.lastName = snapshot['lastName'] ?? "";
+  }
+
+  Future<MemoryImage> getImageFromStorage() async {
+    if (displayImage != null) { return displayImage; }
+    final String imagePath = "userImages/${this.id}/profile_pic.jpg";
+    final imageData = await FirebaseStorage.instance.ref().child(imagePath).getData(1024*1024);
+    this.displayImage = MemoryImage(imageData);
+    return this.displayImage;
   }
 
   String getFullName() {
@@ -20,14 +34,16 @@ class Contact {
 
   User createUserFromContact() {
     return User(
+      id: this.id,
       firstName: this.firstName,
       lastName: this.lastName,
-      imagePath: this.imagePath,
+      displayImage: this.displayImage,
     );
   }
 }
 
 class User extends Contact {
+
   String email;
   String bio;
   String city;
@@ -41,20 +57,37 @@ class User extends Contact {
   List<Posting> savedPostings;
 
   User(
-      {String firstName = "",
+      {String id = "",
+      String firstName = "",
       String lastName = "",
-      String imagePath = "",
+      MemoryImage displayImage,
       this.email = "",
       this.bio = "",
       this.city = "",
       this.country = ""})
-      : super(firstName: firstName, lastName: lastName, imagePath: imagePath) {
+      : super(id: id, firstName: firstName, lastName: lastName, displayImage: displayImage) {
     this.isHost = false;
     this.isCurrentlyHosting = false;
     this.bookings = [];
     this.reviews = [];
     this.conversations = [];
     this.savedPostings = [];
+  }
+
+  Future<void> getUserInfoFromFirestore() async {
+    DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(id).get();
+    this.firstName = snapshot['firstName'] ?? "";
+    this.lastName = snapshot['lastName'] ?? "";
+    this.email = snapshot['email'] ?? "";
+    this.bio = snapshot['bio'] ?? "";
+    this.city = snapshot['city'] ?? "";
+    this.country = snapshot['country'] ?? "";
+    this.isHost = snapshot['isHost'] ?? false;
+    
+    List<String> conversationIDs = List<String>.from(snapshot['conversationIDs']) ?? [];
+    List<String> myPostingIDs = List<String>.from(snapshot['myPostingIDs']) ?? [];
+    List<String> savedPostingIDs = List<String>.from(snapshot['savedPostingIDs']) ?? [];
+
   }
 
   void changeCurrentlyHosting(bool isHosting) {
@@ -68,9 +101,10 @@ class User extends Contact {
 
   Contact createContactFromUser() {
     return Contact(
+      id: this.id,
       firstName: this.firstName,
       lastName: this.firstName,
-      imagePath: this.imagePath,
+      displayImage: this.displayImage,
     );
   }
 
