@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Models/user_objects.dart';
 
 class Conversation {
 
+  String id;
   Contact otherContact;
   List<Message> messages;
   Message lastMessage;
@@ -17,6 +19,28 @@ class Conversation {
     if (messages.isNotEmpty) {
       this.lastMessage = messages.last;
     }
+  }
+
+  void getConversationInfoFromFirestore(DocumentSnapshot snapshot) {
+    this.id = snapshot.documentID;
+
+    String lastMessageText = snapshot['lastMessageText'] ?? "";
+    Timestamp lastMessageTimestamp = snapshot['lastMessageDateTime'] ?? Timestamp.now();
+    DateTime lastMessageDateTime = lastMessageTimestamp.toDate();
+    this.lastMessage = Message();
+    this.lastMessage.dateTime = lastMessageDateTime;
+    this.lastMessage.text = lastMessageText;
+
+    Map<String, String> userInfo = Map<String, String>.from(snapshot['userInfo']);
+    userInfo.forEach((id, name) { 
+      if (id != AppConstants.currentUser.id) {
+        this.otherContact = Contact(
+          id: id,
+          firstName: name.split(" ")[0],
+          lastName: name.split(" ")[1],
+        );
+      }
+    });
   }
 
   String getLastMessageText() {
@@ -49,6 +73,14 @@ class Message {
     this.sender = sender;
     this.text = text;
     this.dateTime = dateTime;
+  }
+
+  void getMessageInfoFromFirestore(DocumentSnapshot snapshot) {
+    Timestamp lastMessageTimestamp = snapshot['dateTime'] ?? Timestamp.now();
+    this.dateTime = lastMessageTimestamp.toDate();
+    String senderID = snapshot['senderID'] ?? "";
+    this.sender = Contact(id: senderID);
+    this.text = snapshot['text'] ?? "";
   }
 
   String getMessageDateTime() {

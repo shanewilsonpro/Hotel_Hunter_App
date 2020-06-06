@@ -210,7 +210,15 @@ class Booking {
     this.posting = posting;
     this.dates = List<String>.from(snapshot['dates']) ?? [];
     String contactID = snapshot['userID'] ?? "";
-    this.contact = Contact(id: contactID);
-    await this.contact.getContactInfoFromFirestore();
+    String fullName = snapshot['name'] ?? "";
+    _loadContactInfo(contactID, fullName);
+  }
+
+  void _loadContactInfo(String id, String fullName) {
+    String firstName = "";
+    String lastName = "";
+    firstName = fullName.split(" ")[0];
+    lastName = fullName.split(" ")[1];
+    this.contact = Contact(id: id, firstName: firstName, lastName: lastName);
   }
 }
