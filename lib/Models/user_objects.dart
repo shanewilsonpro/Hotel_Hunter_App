@@ -108,6 +108,16 @@ class User extends Contact {
     );
   }
 
+  Future<void> getAllBookingsFromFirestore() async {
+    this.bookings = [];
+    QuerySnapshot snapshots = await Firestore.instance.collection('users/${this.id}/bookings').getDocuments();
+    for (var snapshot in snapshots.documents) {
+      Booking newBooking = Booking();
+      await newBooking.getBookingInfoFromFirestoreFromUser(this.createContactFromUser(), snapshot);
+      this.bookings.add(newBooking);
+    }
+  }
+
   void makeNewBooking(Booking booking) {
     this.bookings.add(booking);
   }

@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Models/review_objects.dart';
 import 'package:hotel_hunter_app/Models/user_objects.dart';
 
 class Posting {
+
+  String id;
   String name;
   String type;
   double price;
@@ -11,11 +15,12 @@ class Posting {
   String address;
   String city;
   String country;
+  double rating;
 
   Contact host;
 
-  List<String> imagePaths;
-  List<AssetImage> displayImages;
+  List<String> imageNames;
+  List<MemoryImage> displayImages;
   List<String> amenities;
   List<Booking> bookings;
   List<Review> reviews;
@@ -24,7 +29,8 @@ class Posting {
   Map<String, int> bathrooms;
 
   Posting(
-      {this.name = "",
+      {this.id="",
+      this.name = "",
       this.type = "",
       this.price = 0,
       thisdescription = "",
@@ -32,13 +38,61 @@ class Posting {
       this.city = "",
       this.country = "",
       this.host}) {
-    this.imagePaths = [];
+    this.imageNames = [];
     this.displayImages = [];
     this.amenities = [];
     this.bookings = [];
     this.reviews = [];
     this.beds = {};
     this.bathrooms = {};
+    this.rating = 0;
+  }
+
+  Future<void> getPostingInfoFromFirestore() async {
+    DocumentSnapshot snapshot = await Firestore.instance.collection('postings').document(id).get();
+    this.getPostingInfoFromSnapshot(snapshot);
+
+  }
+
+  void getPostingInfoFromSnapshot(DocumentSnapshot snapshot) {
+    this.address = snapshot['address'] ?? "";
+    this.amenities = List<String>.from(snapshot['amenities']) ?? [];
+    this.bathrooms = Map<String, int>.from(snapshot['bathrooms']) ?? [];
+    this.beds = Map<String, int>.from(snapshot['beds']) ?? {};
+    this.city = snapshot['city'] ?? "";
+    this.country = snapshot['country'] ?? "";
+    this.description = snapshot['description'] ?? "";
+
+    String hostID = snapshot['hostID'] ?? "";
+    this.host = Contact(id: hostID);
+
+    this.imageNames = List<String>.from(snapshot['imageNames']) ?? [];
+    this.name = snapshot['name'] ?? "";
+    this.price = snapshot['price'] ?? 0.0;
+    this.rating = snapshot['rating'] ?? 2.5;
+    this.type = snapshot['type'] ?? "";
+  }
+
+  Future<MemoryImage> getFirstImageFromStorage() async {
+    if (this.displayImages.isNotEmpty) { return this.displayImages.first; }
+    final String imagePath = "postingImages/${this.id}/${this.imageNames.first}";
+    final imageData = await FirebaseStorage.instance.ref().child(imagePath).getData(1024*1024);
+    this.displayImages.add(MemoryImage(imageData));
+    return this.displayImages.first;
+  }
+
+  Future<List<MemoryImage>> getAllImagesFromStorage() async {
+    this.displayImages = [];
+    for(int i = 0; i < this.imageNames.length; i++) {
+      final String imagePath = "postingImages/${this.id}/${this.imageNames.first}";
+      final imageData = await FirebaseStorage.instance.ref().child(imagePath).getData(1024*1024);
+      this.displayImages.add(MemoryImage(imageData));
+    }
+    return this.displayImages;
+  }
+
+  Future<void> getHostFromFirestore() async {
+    await this.host.getContactInfoFromFirestore();
   }
 
   int getNumGuests() {
@@ -47,13 +101,6 @@ class Posting {
     numGuests += this.beds['medium'] * 2;
     numGuests += this.beds['large'] * 2;
     return numGuests;
-  }
-
-  void setImages(List<String> imagePaths) {
-    this.imagePaths = imagePaths;
-    imagePaths.forEach((imagePath) {
-      this.displayImages.add(AssetImage(imagePath));
-    });
   }
 
   String getAmenitiesString() {
@@ -87,6 +134,16 @@ class Posting {
       text += this.beds["half"].toString() + " half ";
     }
     return text;
+  }
+
+  Future<void> getAllBookingsFromFirestore() async {
+    this.bookings = [];
+    QuerySnapshot snapshots = await Firestore.instance.collection('postings/${this.id}/bookings').getDocuments();
+    for (var snapshot in snapshots.documents) {
+      Booking newBooking = Booking();
+      await newBooking.getBookingInfoFromFirestoreFromPosting(this, snapshot);
+      this.bookings.add(newBooking);
+    }
   }
 
   void makeNewBooking(List<DateTime> dates) {
@@ -127,6 +184,8 @@ class Posting {
 }
 
 class Booking {
+
+  String id;
   Posting posting;
   Contact contact;
   List<DateTime> dates;
@@ -137,5 +196,21 @@ class Booking {
     this.posting = posting;
     this.contact = contact;
     this.dates = dates;
+  }
+
+  Future<void> getBookingInfoFromFirestoreFromUser(Contact contact, DocumentSnapshot snapshot) async {
+    this.contact = contact;
+    this.dates = List<String>.from(snapshot['dates']) ?? [];
+    String postingID = snapshot['postingID'] ?? "";
+    this.posting = Posting(id: postingID);
+    await this.posting.getPostingInfoFromFirestore();
+  }
+
+  Future<void> getBookingInfoFromFirestoreFromPosting(Posting posting, DocumentSnapshot snapshot) async {
+    this.posting = posting;
+    this.dates = List<String>.from(snapshot['dates']) ?? [];
+    String contactID = snapshot['userID'] ?? "";
+    this.contact = Contact(id: contactID);
+    await this.contact.getContactInfoFromFirestore();
   }
 }
