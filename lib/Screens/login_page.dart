@@ -34,10 +34,10 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       ).then((firebaseUser) {
         String userID = firebaseUser.user.uid;
-        User user = User();
-        user.id = userID;
-
-        Navigator.pushNamed(context, GuestHomePage.routeName);
+        AppConstants.currentUser = User(id: userID);
+        AppConstants.currentUser.getPersonalInfoFromFirestore().whenComplete(() {
+          Navigator.pushNamed(context, GuestHomePage.routeName);
+        });
       });
     }
   }

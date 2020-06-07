@@ -71,6 +71,14 @@ class _CalendarMonthState extends State<CalendarMonthWidget> {
           ),
           itemBuilder: (context, index) {
             MonthTile monthTile = _monthTiles[index];
+            if (widget.bookedDates.contains(monthTile.dateTime)) {
+            return MaterialButton(
+              onPressed: null,
+              child: monthTile,
+              color: Colors.yellow,
+              disabledColor: Colors.yellow,
+            );
+            }
             return MaterialButton(
               onPressed: () {},
               child: monthTile,

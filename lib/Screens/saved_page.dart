@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Views/grid_widgets.dart';
 
@@ -17,22 +19,24 @@ class _SavedPageState extends State<SavedPage> {
       child: GridView.builder(
         physics: ScrollPhysics(),
         shrinkWrap: true,
-        itemCount: 2,
+        itemCount: AppConstants.currentUser.savedPostings.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 15,
             mainAxisSpacing: 15,
             childAspectRatio: 3 / 4),
         itemBuilder: (context, index) {
+          Posting currentPosting = AppConstants.currentUser.savedPostings[index];
           return Stack(
             children: <Widget>[
               InkResponse(
                 enableFeedback: true,
-                child: PostingGridTile(),
+                child: PostingGridTile(posting: currentPosting,),
                 onTap: () {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    ViewPostingPage.routeName,
+                    MaterialPageRoute(builder: (context) => ViewPostingPage(posting: currentPosting,),
+                    ),
                   );
                 },
               ),

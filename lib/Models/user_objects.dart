@@ -44,6 +44,7 @@ class Contact {
 
 class User extends Contact {
 
+  DocumentSnapshot snapshot;
   String email;
   String bio;
   String city;
@@ -55,6 +56,7 @@ class User extends Contact {
   List<Review> reviews;
   List<Conversation> conversations;
   List<Posting> savedPostings;
+  List<Posting> myPostings;
 
   User(
       {String id = "",
@@ -72,10 +74,12 @@ class User extends Contact {
     this.reviews = [];
     this.conversations = [];
     this.savedPostings = [];
+    this.myPostings = [];
   }
 
   Future<void> getUserInfoFromFirestore() async {
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(id).get();
+    this.snapshot = snapshot;
     this.firstName = snapshot['firstName'] ?? "";
     this.lastName = snapshot['lastName'] ?? "";
     this.email = snapshot['email'] ?? "";
@@ -83,11 +87,36 @@ class User extends Contact {
     this.city = snapshot['city'] ?? "";
     this.country = snapshot['country'] ?? "";
     this.isHost = snapshot['isHost'] ?? false;
-    
-    List<String> conversationIDs = List<String>.from(snapshot['conversationIDs']) ?? [];
-    List<String> myPostingIDs = List<String>.from(snapshot['myPostingIDs']) ?? [];
-    List<String> savedPostingIDs = List<String>.from(snapshot['savedPostingIDs']) ?? [];
 
+  }
+
+  Future<void> getPersonalInfoFromFirestore() async {
+    await getUserInfoFromFirestore();
+    await getImageFromStorage();
+    await getMyPostingsFromFirestore();
+    await getSavedPostingsFromFirestore();
+    await getAllBookingsFromFirestore();
+  }
+
+  Future<void> getMyPostingsFromFirestore() async {
+    List<String> myPostingIDs = List<String>.from(snapshot['myPostingIDs']) ?? [];
+    for (String postingID in myPostingIDs) {
+      Posting newPosting = Posting(id: postingID);
+      await newPosting.getPostingInfoFromFirestore();
+      await newPosting.getAllBookingsFromFirestore();
+      await newPosting.getAllImagesFromStorage();
+      this.myPostings.add(newPosting);
+    }
+  }
+
+  Future<void> getSavedPostingsFromFirestore() async {
+    List<String> savedPostingIDs = List<String>.from(snapshot['savedPostingIDs']) ?? [];
+    for (String postingID in savedPostingIDs) {
+      Posting newPosting = Posting(id: postingID);
+      await newPosting.getPostingInfoFromFirestore();
+      await newPosting.getFirstImageFromStorage();
+      this.savedPostings.add(newPosting);
+    }
   }
 
   void changeCurrentlyHosting(bool isHosting) {
@@ -132,6 +161,25 @@ class User extends Contact {
         this.savedPostings.removeAt(1);
       }
     }
+  }
+
+  List<Booking> getPreviousTrips() {
+    List<Booking> previousTrips = [];
+    this.bookings.forEach((booking) {
+      if(booking.dates.last.compareTo(DateTime.now()) <= 0) {
+        previousTrips.add(booking);
+      }
+    });
+  }
+
+  List<Booking> getUpcomingTrips() {
+    List<Booking> upcomingTrips = [];
+    this.bookings.forEach((booking) { 
+      if (booking.dates.last.compareTo(DateTime.now()) > 0) {
+        upcomingTrips.add(booking);
+      }
+    });
+    return upcomingTrips;
   }
 
   double getCurrentRating() {

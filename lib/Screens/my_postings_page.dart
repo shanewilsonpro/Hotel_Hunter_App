@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Screens/create_posting_page.dart';
 import 'package:hotel_hunter_app/Views/list_widgets.dart';
 
@@ -15,15 +16,20 @@ class _MyPostingsPageState extends State<MyPostingsPage> {
     return Padding(
       padding: const EdgeInsets.only(top: 25.0),
       child: ListView.builder(
-        itemCount: 3,
+        itemCount: AppConstants.currentUser.myPostings.length + 1,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.fromLTRB(25, 0, 25, 25),
             child: InkResponse(
               onTap: () {
-                Navigator.pushNamed(
+                Navigator.push(
                   context,
-                  CreatePostingPage.routeName,
+                  MaterialPageRoute(builder: (context) => CreatePostingPage(
+                    posting: (index == AppConstants.currentUser.myPostings.length) ?
+                    null :
+                    AppConstants.currentUser.myPostings[index],
+            
+                  ),),
                 );
               },
               child: Container(

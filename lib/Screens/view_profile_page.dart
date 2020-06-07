@@ -1,5 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/review_objects.dart';
+import 'package:hotel_hunter_app/Models/user_objects.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'package:hotel_hunter_app/Views/form_widget.dart';
 import 'package:hotel_hunter_app/Views/list_widgets.dart';
@@ -8,15 +12,29 @@ import 'package:hotel_hunter_app/Views/text_widgets.dart';
 class ViewProfilePage extends StatefulWidget {
   static final String routeName = '/view_profile_pageRoute';
 
-  ViewProfilePage({Key key}) : super(key: key);
+  final Contact contact;
+
+  ViewProfilePage({this.contact, Key key}) : super(key: key);
 
   @override
   _ViewProfilePageState createState() => _ViewProfilePageState();
 }
 
 class _ViewProfilePageState extends State<ViewProfilePage> {
-  void _signup() {
-    Navigator.pushNamed(context, GuestHomePage.routeName);
+
+  User _user;
+
+  @override
+  void initState() {
+    if (widget.contact.id == AppConstants.currentUser.id) {
+      _user = AppConstants.currentUser;
+    } else {
+      this._user = widget.contact.createUserFromContact();
+      this._user.getUserInfoFromFirestore().whenComplete(() {
+        setState(() {});
+      });
+    }
+    super.initState();
   }
 
   @override
@@ -120,14 +138,27 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 25.0),
-                child: ListView.builder(
-                  itemCount: 2,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                      child: ReviewListTile(),
-                    );
+                child: StreamBuilder(
+                  stream: Firestore.instance.collection('users/${_user.id}/reviews').orderBy('dateTime', descending: true).snapshots(),
+                  builder: (context, snapshots) {
+                    switch (snapshots.connectionState) {
+                      case ConnectionState.waiting:
+                        return Center(child: CircularProgressIndicator(),);
+                      default:
+                          return ListView.builder(
+                    itemCount: snapshots.data.documents.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      DocumentSnapshot snapshot = snapshots.data.documents[index];
+                      Review currentReview = Review();
+                      currentReview.getReviewInfoFromFirestore(snapshot);
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                        child: ReviewListTile(review: currentReview,),
+                      );
+                    },
+                  );
+                    }
                   },
                 ),
               ),

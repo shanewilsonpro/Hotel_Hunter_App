@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Views/grid_widgets.dart';
 
@@ -10,6 +12,7 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -37,26 +40,41 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
               ),
             ),
-            GridView.builder(
-              physics: ScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 3,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 3 / 4),
-              itemBuilder: (context, index) {
-                return InkResponse(
-                  enableFeedback: true,
-                  child: PostingGridTile(),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      ViewPostingPage.routeName,
+            StreamBuilder(
+              stream: Firestore.instance.collection('postings').snapshots(),
+              builder: (context, snapshots) {
+                switch (snapshots.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(
+                      child: CircularProgressIndicator(),
                     );
-                  },
-                );
+                  default:
+                    return GridView.builder(
+                      physics: ScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: snapshots.data.documents.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 15,
+                          childAspectRatio: 3 / 4),
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot snapshot = snapshots.data.documents[index];
+                        Posting currentPosting = Posting(id: snapshot.documentID);
+                        currentPosting.getPostingInfoFromSnapshot(snapshot);
+                        return InkResponse(
+                          enableFeedback: true,
+                          child: PostingGridTile(posting: currentPosting,),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              ViewPostingPage.routeName,
+                            );
+                          },
+                        );
+                      },
+                    );
+                }
               },
             ),
           ],

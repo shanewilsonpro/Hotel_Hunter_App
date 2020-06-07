@@ -68,8 +68,8 @@ class Posting {
 
     this.imageNames = List<String>.from(snapshot['imageNames']) ?? [];
     this.name = snapshot['name'] ?? "";
-    this.price = snapshot['price'] ?? 0.0;
-    this.rating = snapshot['rating'] ?? 2.5;
+    this.price = snapshot['price'].toDouble() ?? 0.0;
+    this.rating = snapshot['rating'].toDouble() ?? 2.5;
     this.type = snapshot['type'] ?? "";
   }
 
@@ -93,6 +93,7 @@ class Posting {
 
   Future<void> getHostFromFirestore() async {
     await this.host.getContactInfoFromFirestore();
+    await this.host.getImageFromStorage();
   }
 
   int getNumGuests() {
@@ -101,6 +102,10 @@ class Posting {
     numGuests += this.beds['medium'] * 2;
     numGuests += this.beds['large'] * 2;
     return numGuests;
+  }
+
+  String getFullAddress() {
+    return this.address + ", " + this.city + ", " + this.country;
   }
 
   String getAmenitiesString() {
@@ -200,15 +205,24 @@ class Booking {
 
   Future<void> getBookingInfoFromFirestoreFromUser(Contact contact, DocumentSnapshot snapshot) async {
     this.contact = contact;
-    this.dates = List<String>.from(snapshot['dates']) ?? [];
+    List<Timestamp> timestamps = List<Timestamp>.from(snapshot['dates']) ?? [];
+    this.dates = [];
+    timestamps.forEach((timestamp) {
+      this.dates.add(timestamp.toDate());
+    });
     String postingID = snapshot['postingID'] ?? "";
     this.posting = Posting(id: postingID);
     await this.posting.getPostingInfoFromFirestore();
+    await this.posting.getFirstImageFromStorage();
   }
 
   Future<void> getBookingInfoFromFirestoreFromPosting(Posting posting, DocumentSnapshot snapshot) async {
     this.posting = posting;
-    this.dates = List<String>.from(snapshot['dates']) ?? [];
+    List<Timestamp> timestamps = List<Timestamp>.from(snapshot['dates']) ?? [];
+    this.dates = [];
+    timestamps.forEach((timestamp) {
+      this.dates.add(timestamp.toDate());
+    });
     String contactID = snapshot['userID'] ?? "";
     String fullName = snapshot['name'] ?? "";
     _loadContactInfo(contactID, fullName);

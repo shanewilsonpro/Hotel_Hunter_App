@@ -63,7 +63,15 @@ class _AccountPageState extends State<AccountPage> {
               children: <Widget>[
                 MaterialButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, ViewProfilePage.routeName);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewProfilePage(
+                          contact:
+                              AppConstants.currentUser.createContactFromUser(),
+                        ),
+                      ),
+                    );
                   },
                   child: CircleAvatar(
                     backgroundColor: Colors.black,

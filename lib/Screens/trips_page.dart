@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Screens/view_posting_page.dart';
 import 'package:hotel_hunter_app/Views/grid_widgets.dart';
 
@@ -10,6 +12,12 @@ class TripsPage extends StatefulWidget {
 }
 
 class _TripsPageState extends State<TripsPage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,21 +41,23 @@ class _TripsPageState extends State<TripsPage> {
               child: Container(
                 height: MediaQuery.of(context).size.height / 3,
                 child: ListView.builder(
-                  itemCount: 3,
+                  itemCount: AppConstants.currentUser.getUpcomingTrips().length,
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
+                    Booking currentBooking = AppConstants.currentUser.getUpcomingTrips()[index];
                     return Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Container(
                         width: MediaQuery.of(context).size.width / 2.5,
                         child: InkResponse(
                           enableFeedback: true,
-                          child: TripGridTile(),
+                          child: TripGridTile(booking: currentBooking,),
                           onTap: () {
-                            Navigator.pushNamed(
+                            Navigator.push(
                               context,
-                              ViewPostingPage.routeName,
+                              MaterialPageRoute(builder: (context) => ViewPostingPage(posting: currentBooking.posting,),
+                              ),
                             );
                           },
                         ),

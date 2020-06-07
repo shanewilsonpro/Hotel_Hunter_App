@@ -1,8 +1,12 @@
 import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
+import 'package:hotel_hunter_app/Models/review_objects.dart';
 import 'package:hotel_hunter_app/Screens/book_posting_page.dart';
 import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
@@ -12,14 +16,16 @@ import 'package:hotel_hunter_app/Views/text_widgets.dart';
 
 class ViewPostingPage extends StatefulWidget {
   static final String routeName = '/view_posting_pageRoute';
+  final Posting posting;
 
-  ViewPostingPage({Key key}) : super(key: key);
+  ViewPostingPage({this.posting, Key key}) : super(key: key);
 
   @override
   _ViewPostingPageState createState() => _ViewPostingPageState();
 }
 
 class _ViewPostingPageState extends State<ViewPostingPage> {
+  Posting _posting;
   List<String> _amenities = [
     'Hair dryer',
     'Dishwasher',
@@ -31,9 +37,31 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
   LatLng _centerLatLong = LatLng(34.0522, -118.2437);
   Completer<GoogleMapController> _completer;
 
+  void _calculateLatAndLng() {
+    _centerLatLong = LatLng(34.0522, -118.2437);
+    Geolocator()
+        .placemarkFromAddress(_posting.getFullAddress())
+        .then((placemarks) {
+      placemarks.forEach((placemark) {
+        setState(() {
+          _centerLatLong =
+              LatLng(placemark.position.latitude, placemark.position.longitude);
+        });
+      });
+    });
+  }
+
   @override
   void initState() {
+    this._posting = widget.posting;
+    this._posting.getAllImagesFromStorage().whenComplete(() {
+      setState(() {});
+    });
+    this._posting.getHostFromFirestore().whenComplete(() {
+      setState(() {});
+    });
     _completer = Completer();
+    _calculateLatAndLng();
 
     super.initState();
   }
@@ -271,19 +299,33 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 25.0),
-                    child: ListView.builder(
-                      itemCount: 2,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding:
-                              const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                          child: ReviewListTile(),
-                        );
+                    child: StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('postings/${this._posting.id}/reviews')
+                          .snapshots(),
+                      builder: (context, snapshots) {
+                        switch (snapshots.connectionState) {
+                          case ConnectionState.waiting:
+                            return Center(child: CircularProgressIndicator());
+                          default:
+                            return ListView.builder(
+                              itemCount: snapshots.data.documents.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                DocumentSnapshot snapshot = snapshots.data.documents[index];
+                                Review currentReview = Review();
+                                currentReview.getReviewInfoFromFirestore(snapshot);
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 10.0, bottom: 10.0),
+                                  child: ReviewListTile(review: currentReview),
+                                );
+                              },
+                            );
+                        }
                       },
                     ),
                   ),
-                  //ListView.builder(itemBuilder: null),
                 ],
               ),
             ),

@@ -2,16 +2,32 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/review_objects.dart';
 import 'package:hotel_hunter_app/Screens/view_profile_page.dart';
 
 class ReviewListTile extends StatefulWidget {
-  ReviewListTile({Key key}) : super(key: key);
+
+  final Review review;
+
+  ReviewListTile({this.review, Key key}) : super(key: key);
 
   @override
   _ReviewListTileState createState() => _ReviewListTileState();
 }
 
 class _ReviewListTileState extends State<ReviewListTile> {
+
+  Review _review;
+
+  @override
+  void initState() {
+    this._review = widget.review;
+    this._review.contact.getImageFromStorage().whenComplete(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
