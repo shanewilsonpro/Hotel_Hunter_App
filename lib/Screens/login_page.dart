@@ -6,7 +6,9 @@ import 'package:hotel_hunter_app/Screens/guest_home_page.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
+
   static final String routeName = '/login_pageRoute';
+
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   LoginPage({Key key}) : super(key: key);
@@ -16,12 +18,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
   void _signup() {
-    Navigator.pushNamed(context, SignupPage.routeName);
+    if (_formKey.currentState.validate()) {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      AppConstants.currentUser = User();
+      AppConstants.currentUser.email = email;
+      AppConstants.currentUser.password = password;
+      Navigator.pushNamed(context, SignupPage.routeName);
+    }
   }
 
   void _login() {

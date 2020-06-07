@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +53,7 @@ class User extends Contact {
   String country;
   bool isHost;
   bool isCurrentlyHosting;
+  String password;
 
   List<Booking> bookings;
   List<Review> reviews;
@@ -117,6 +120,38 @@ class User extends Contact {
       await newPosting.getFirstImageFromStorage();
       this.savedPostings.add(newPosting);
     }
+  }
+
+  Future<void> addUserToFirestore() async {
+    Map<String, dynamic> data = {
+      "bio": this.bio,
+      "city": this.city,
+      "country": this.country,
+      "email": this.email,
+      "firstName": this.firstName,
+      "isHost": false,
+      "lastName": this.lastName,
+      "myPostingIDs": [],
+      "savedPostingIDs": [],
+    };
+    await Firestore.instance.document('users/${this.id}').setData(data);
+  }
+
+  Future<void> updateUserInFirestore() async {
+    Map<String, dynamic> data = {
+      "bio": this.bio,
+      "city": this.city,
+      "country": this.country,
+      "firstName": this.firstName,
+      "lastName": this.lastName,
+    };
+    await Firestore.instance.document('users/${this.id}').updateData(data);
+  }
+
+  Future<void> addImageToFirestore(File imageFile) async {
+    StorageReference reference = FirebaseStorage.instance.ref().child('userImages/${this.id}/profile_pic.jpg');
+    await reference.putFile(imageFile).onComplete;
+    this.displayImage = MemoryImage(imageFile.readAsBytesSync());
   }
 
   void changeCurrentlyHosting(bool isHosting) {
