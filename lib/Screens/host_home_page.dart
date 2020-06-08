@@ -8,8 +8,9 @@ import 'package:hotel_hunter_app/Views/text_widgets.dart';
 
 class HostHomePage extends StatefulWidget {
   static final String routeName = '/host_home_pageRoute';
+  final int index;
 
-  HostHomePage({Key key}) : super(key: key);
+  HostHomePage({this.index, Key key}) : super(key: key);
 
   @override
   _HostHomePageState createState() => _HostHomePageState();
@@ -50,6 +51,12 @@ class _HostHomePageState extends State<HostHomePage> {
                 : AppConstants.nonSelectedIconColor),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    this._selectedIndex = widget.index ?? 3;
+    super.initState();
   }
 
   @override

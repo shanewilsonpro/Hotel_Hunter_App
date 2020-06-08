@@ -1,23 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
+import 'package:hotel_hunter_app/Screens/host_home_page.dart';
+import 'package:hotel_hunter_app/Screens/my_postings_page.dart';
 import 'package:hotel_hunter_app/Views/text_widgets.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreatePostingPage extends StatefulWidget {
+
   static final String routeName = '/create_posting_pageRoute';
 
-  CreatePostingPage({Key key}) : super(key: key);
+  final Posting posting;
+
+  CreatePostingPage({this.posting, Key key}) : super(key: key);
 
   @override
   _CreatePostingPageState createState() => _CreatePostingPageState();
 }
 
 class _CreatePostingPageState extends State<CreatePostingPage> {
-  String _houseType;
+
   final List<String> _houseTypes = [
     'Detached House',
     'Apartment',
     'Condo',
     'Townhouse',
   ];
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _nameController;
+  TextEditingController _priceController;
+  TextEditingController _descriptionController;
+  TextEditingController _addressController;
+  TextEditingController _cityController;
+  TextEditingController _countryController;
+  TextEditingController _amenitiesController;
+
+  String _houseType;
+  Map<String, int> _beds;
+  Map<String, int> _bathrooms;
+  List<MemoryImage> _images;
+
+  void _selectImage(int index) async {
+    var imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if (imageFile != null) {
+      MemoryImage newImage = MemoryImage(imageFile.readAsBytesSync());
+      if (index < 0) {
+        _images.add(newImage);
+      } else {
+        _images[index] = newImage;
+      }
+      setState(() {});
+    }
+  }
+
+  void _savePosting() {
+    if (!_formKey.currentState.validate()) { return; }
+    if (_houseType == null) { return; }
+    if (_images.isEmpty) { return; }
+
+    Posting posting = Posting();
+    posting.name = _nameController.text;
+    posting.price = double.parse(_priceController.text);
+    posting.description = _descriptionController.text;
+    posting.address = _addressController.text;
+    posting.city = _cityController.text;
+    posting.country = _countryController.text;
+    posting.amenities = _amenitiesController.text.split(",");
+    posting.type = _houseType;
+    posting.beds = _beds;
+    posting.bathrooms = _bathrooms;
+    posting.displayImages = _images;
+    posting.host = AppConstants.currentUser.createContactFromUser();
+    posting.setImageNames();
+    if (widget.posting == null) {
+      posting.rating = 2.5;
+      posting.bookings = [];
+      posting.reviews = [];
+      posting.addPostingInfoToFirestore().whenComplete(() {
+        posting.addImagesToFirestore().whenComplete(() {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => HostHomePage(index: 1)),);
+        });
+      });
+    } else {
+      posting.rating = widget.posting.rating;
+      posting.bookings = widget.posting.bookings;
+      posting.reviews = widget.posting.reviews;
+      posting.id = widget.posting.id;
+      for (int i = 0; i < AppConstants.currentUser.myPostings.length; i++) {
+        if (AppConstants.currentUser.myPostings[i].id == posting.id) {
+          AppConstants.currentUser.myPostings[i] = posting;
+          break;
+        }
+      }
+      posting.updatePostingInfoInFirestore().whenComplete(() {
+        posting.addImagesToFirestore().whenComplete(() {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => HostHomePage(index: 1)),);
+        });
+      });
+    }
+  }
+
+  void _setUpInitialValue() {
+    if (widget.posting = null) {
+      _nameController = TextEditingController();
+      _priceController = TextEditingController();
+      _descriptionController = TextEditingController();
+      _addressController = TextEditingController();
+      _cityController = TextEditingController();
+      _countryController = TextEditingController();
+      _amenitiesController = TextEditingController();
+      _beds = {
+        'small': 0,
+        'medium': 0,
+        'large': 0
+      };
+      _bathrooms = {
+        'full': 0,
+        'half': 0,
+      };
+      _images = [];
+    } else {
+      _nameController = TextEditingController(text: widget.posting.name);
+      _priceController = TextEditingController(text: widget.posting.price.toString());
+      _descriptionController = TextEditingController(text: widget.posting.description);
+      _addressController = TextEditingController(text: widget.posting.address);
+      _cityController = TextEditingController(text: widget.posting.city);
+      _countryController = TextEditingController(text: widget.posting.country);
+      _amenitiesController = TextEditingController(text: widget.posting.getAmenitiesString());
+      _beds = widget.posting.beds;
+      _bathrooms = widget.posting.bathrooms;
+      _images = widget.posting.displayImages;
+      _houseType = widget.posting.type;
+    }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    _setUpInitialValue();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +153,7 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
           ),
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {},
+            onPressed: _savePosting,
           ),
         ],
       ),
@@ -51,6 +173,7 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                   textAlign: TextAlign.center,
                 ),
                 Form(
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -62,6 +185,13 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _nameController,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter a name.";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -86,7 +216,12 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                                 ),
                               );
                             }).toList(),
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              this._houseType = value;
+                              setState(() {
+
+                              });
+                            },
                           )),
                       Padding(
                         padding: const EdgeInsets.only(top: 25.0),
@@ -100,6 +235,13 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                                   fontSize: 25.0,
                                 ),
                                 keyboardType: TextInputType.number,
+                                controller: _priceController,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter a price.";
+                            }
+                            return null;
+                          },
                               ),
                             ),
                             Padding(
@@ -122,6 +264,15 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _descriptionController,
+                          maxLines: 3,
+                          minLines: 1,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter a description.";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -131,6 +282,13 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _addressController,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter an address.";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -140,6 +298,13 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _cityController,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter a city.";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -149,6 +314,13 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _countryController,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter a country.";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -167,15 +339,42 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           children: <Widget>[
                             FacilitiesWidget(
                               type: 'Twin/Single',
-                              startValue: 0,
+                              startValue: _beds['small'],
+                              decreaseValue: () {
+                                this._beds['small']--;
+                                if (this._beds['small'] < 0) {
+                                  this._beds['small'] = 0;
+                                }
+                              },
+                              increaseValue: () {
+                                this._beds['small']++;
+                              },
                             ),
                             FacilitiesWidget(
                               type: 'Double',
-                              startValue: 0,
+                              startValue: _beds['medium'],
+                              decreaseValue: () {
+                                this._beds['medium']--;
+                                if (this._beds['medium'] < 0) {
+                                  this._beds['medium'] = 0;
+                                }
+                              },
+                              increaseValue: () {
+                                this._beds['medium']++;
+                              },
                             ),
                             FacilitiesWidget(
                               type: 'Queen/King',
-                              startValue: 0,
+                              startValue: _beds['large'],
+                              decreaseValue: () {
+                                this._beds['large']--;
+                                if (this._beds['large'] < 0) {
+                                  this._beds['large'] = 0;
+                                }
+                              },
+                              increaseValue: () {
+                                this._beds['large']++;
+                              },
                             ),
                           ],
                         ),
@@ -196,11 +395,29 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           children: <Widget>[
                             FacilitiesWidget(
                               type: 'Half',
-                              startValue: 0,
+                              startValue: _bathrooms['half'],
+                              decreaseValue: () {
+                                this._bathrooms['half']--;
+                                if (this._bathrooms['half'] < 0) {
+                                  this._bathrooms['half'] = 0;
+                                }
+                              },
+                              increaseValue: () {
+                                this._bathrooms['half']++;
+                              },
                             ),
                             FacilitiesWidget(
                               type: 'Full',
-                              startValue: 0,
+                              startValue: _bathrooms['full'],
+                              decreaseValue: () {
+                                this._bathrooms['full']--;
+                                if (this._bathrooms['full'] < 0) {
+                                  this._bathrooms['full'] = 0;
+                                }
+                              },
+                              increaseValue: () {
+                                this._bathrooms['full']++;
+                              },
                             ),
                           ],
                         ),
@@ -213,6 +430,15 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                           style: TextStyle(
                             fontSize: 25.0,
                           ),
+                          controller: _amenitiesController,
+                          maxLines: 3,
+                          minLines: 1,
+                          validator: (text) {
+                            if (text.isEmpty) {
+                              return "Please enter some amenities (comma separated).";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       Padding(
@@ -229,7 +455,7 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                         padding: const EdgeInsets.only(top: 25.0, bottom: 25.0),
                         child: GridView.builder(
                           shrinkWrap: true,
-                          itemCount: 2,
+                          itemCount: _images.length + 1,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
@@ -237,17 +463,20 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
                                   crossAxisSpacing: 25,
                                   childAspectRatio: 3 / 2),
                           itemBuilder: (context, index) {
-                            if (index == 1) {
+                            if (index == _images.length) {
                               return IconButton(
                                 icon: Icon(Icons.add),
-                                onPressed: () {},
+                                onPressed: () {
+                                  _selectImage(-1);
+                                },
                               );
                             }
                             return MaterialButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _selectImage(index);
+                              },
                               child: Image(
-                                image:
-                                    AssetImage('assets/images/apartment.jpg'),
+                                image: _images[index],
                                 fit: BoxFit.fill,
                               ),
                             );
@@ -269,14 +498,17 @@ class _CreatePostingPageState extends State<CreatePostingPage> {
 class FacilitiesWidget extends StatefulWidget {
   final String type;
   final int startValue;
+  final Function decreaseValue;
+  final Function increaseValue;
 
-  FacilitiesWidget({Key key, this.type, this.startValue}) : super(key: key);
+  FacilitiesWidget({Key key, this.type, this.startValue, this.decreaseValue, this.increaseValue}) : super(key: key);
 
   @override
   _FacilitiesWidgetState createState() => _FacilitiesWidgetState();
 }
 
 class _FacilitiesWidgetState extends State<FacilitiesWidget> {
+
   int _value;
 
   @override
@@ -301,7 +533,16 @@ class _FacilitiesWidgetState extends State<FacilitiesWidget> {
           children: <Widget>[
             IconButton(
               icon: Icon(Icons.remove),
-              onPressed: () {},
+              onPressed: () {
+                widget.decreaseValue();
+                this._value--;
+                if (this._value < 0) {
+                  this._value = 0;
+                }
+                setState(() {
+                  
+                });
+              },
             ),
             Text(
               this._value.toString(),
@@ -311,7 +552,13 @@ class _FacilitiesWidgetState extends State<FacilitiesWidget> {
             ),
             IconButton(
               icon: Icon(Icons.add),
-              onPressed: () {},
+              onPressed: () {
+                widget.increaseValue();
+                this._value++;
+                setState(() {
+                  
+                });
+              },
             ),
           ],
         ),
