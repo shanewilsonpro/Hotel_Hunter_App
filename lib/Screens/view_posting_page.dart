@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
 import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Models/review_objects.dart';
 import 'package:hotel_hunter_app/Screens/book_posting_page.dart';
@@ -77,7 +78,9 @@ class _ViewPostingPageState extends State<ViewPostingPage> {
               Icons.save,
               color: Colors.white,
             ),
-            onPressed: () {},
+            onPressed: () {
+              AppConstants.currentUser.addSavedPosting(this._posting);
+            },
           ),
         ],
       ),

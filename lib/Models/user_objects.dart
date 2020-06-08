@@ -197,16 +197,45 @@ class User extends Contact {
     this.bookings.add(booking);
   }
 
-  void addSavedPosting(Posting posting) {
-    this.savedPostings.add(posting);
+  List<DateTime> getAllBookedDates() {
+    List<DateTime> allBookedDates = [];
+    this.myPostings.forEach((posting) {
+      posting.bookings.forEach((booking) {
+        allBookedDates.addAll(booking.dates);
+      });
+    });
   }
 
-  void removeSavedPosting(Posting posting) {
-    for (int i = 0; i < this.savedPostings.length; i++) {
-      if (this.savedPostings[i].name == posting.name) {
-        this.savedPostings.removeAt(1);
+  Future<void> addSavedPosting(Posting posting) async {
+    for (var savedPosting in this.savedPostings) {
+      if (savedPosting.id == posting.id) {
+        return;
       }
     }
+    this.savedPostings.add(posting);
+    List<String> savedPostingIDs = [];
+    this.savedPostings.forEach((savedPosting) {
+      savedPostingIDs.add(savedPosting.id);
+    });
+    await Firestore.instance.document('users/${this.id}').updateData({
+      'savedPostingIDs': savedPostingIDs,
+    });
+  }
+
+  Future<void> removeSavedPosting(Posting posting) async {
+    for (int i = 0; i < this.savedPostings.length; i++) {
+      if (this.savedPostings[i].id == posting.id) {
+        this.savedPostings.removeAt(i);
+        break;
+      }
+    }
+    List<String> savedPostingIDs = [];
+    this.savedPostings.forEach((savedPosting) {
+      savedPostingIDs.add(savedPosting.id);
+    });
+    await Firestore.instance.document('users/${this.id}').updateData({
+      'savedPostingIDs': savedPostingIDs,
+    });
   }
 
   List<Booking> getPreviousTrips() {
