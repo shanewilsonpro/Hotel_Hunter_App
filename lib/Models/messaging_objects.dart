@@ -31,34 +31,57 @@ class Conversation {
     this.lastMessage.dateTime = lastMessageDateTime;
     this.lastMessage.text = lastMessageText;
 
-    Map<String, String> userInfo = Map<String, String>.from(snapshot['userInfo']);
-    userInfo.forEach((id, name) { 
-      if (id != AppConstants.currentUser.id) {
-        this.otherContact = Contact(
-          id: id,
-          firstName: name.split(" ")[0],
-          lastName: name.split(" ")[1],
-        );
+    List<String> userIDs = List<String>.from(snapshot['userIDs']) ?? [];
+    List<String> userNames = List<String>.from(snapshot['userNames']) ?? [];
+    this.otherContact = Contact();
+    for(String userID in userIDs) {
+      if (userID != AppConstants.currentUser.id) {
+        this.otherContact.id = userID;
+        break;
       }
-    });
-  }
-
-  String getLastMessageText() {
-    if (messages.isEmpty) {
-      return "";
-    } else {
-      return messages.last.text;
+    }
+    for(String name in userNames) {
+      if (name != AppConstants.currentUser.getFullName()) {
+        this.otherContact.firstName = name.split(" ")[0];
+        this.otherContact.lastName = name.split(" ")[1];
+        break;
+      }
     }
   }
 
-  String getLastMessageDateTime() {
-    if (messages.isEmpty) {
-      return "";
-    } else {
-      return messages.last.getMessageDateTime();
-    }
+  Future<void> addConversationToFirestore() async {
+    List<String> userNames = [
+      AppConstants.currentUser.getFullName(),
+      otherContact.getFullName(),
+    ];
+    List<String> userIDs = [
+      AppConstants.currentUser.id,
+      otherContact.id,
+    ];
+    Map<String,dynamic> convoData = {
+      'lastMessageDateTime': DateTime.now();
+      'lastMessageText': "",
+      'userNames': userNames,
+      'userIDs': userIDs,
+    };
+    DocumentReference reference = await Firestore.instance.collection('conversations').add(convoData);
+    this.id = reference.documentID;
   }
 
+  Future<void> addMessageToFirestore(String messageText) async {
+    DateTime now = DateTime.now();
+    Map<String,dynamic> messageData = {
+      'dateTime': now,
+      'senderID': AppConstants.currentUser.id,
+      'text': messageText
+    };
+    await Firestore.instance.collection('conversations/${this.id}/messages').add(messageData);
+    Map<String,dynamic> convoData = {
+      'lastMessageDateTime': now,
+      'lastMessageText': messageData
+    };
+    await Firestore.instance.document('conversations/${this.id}').updateData(convoData);
+  }
 }
 
 class Message {

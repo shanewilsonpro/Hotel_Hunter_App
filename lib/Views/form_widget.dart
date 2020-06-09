@@ -1,15 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
+import 'package:hotel_hunter_app/Models/user_objects.dart';
 
 class ReviewForm extends StatefulWidget {
-  ReviewForm({Key key}) : super(key: key);
+
+  final Posting posting;
+  final User user;
+
+  ReviewForm({Key key, this.posting, this.user}) : super(key: key);
 
   @override
   _ReviewFormState createState() => _ReviewFormState();
 }
 
 class _ReviewFormState extends State<ReviewForm> {
+
+  TextEditingController _controller = TextEditingController();
+  double _rating = 2.5;
+
+  void _submitReview() {
+    if (widget.posting == null) {
+      widget.user.postNewReviews(_controller.text, _rating).whenComplete(() {
+        _controller.text = "";
+        _rating = 2.5;
+        setState(() {});
+      });
+    } else {
+      widget.posting.postNewReviews(_controller.text, _rating).whenComplete(() {
+        _controller.text = "";
+        _rating = 2.5;
+        setState(() {});
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,22 +61,33 @@ class _ReviewFormState extends State<ReviewForm> {
                       maxLines: 2,
                       style: TextStyle(
                         fontSize: 20.0,
-                      )),
+                      ),
+                      controller: _controller,
+                      validator: (text) {
+                        if (text.isEmpty) {
+                          return "Please enter some text";
+                        }
+                        return null;
+                      },
+                      ),
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
                     child: StarRating(
-                      rating: 2.5,
+                      rating: _rating,
                       size: 40.0,
                       starCount: 5,
                       color: AppConstants.selectedIconColor,
-                      onRatingChanged: (rating) {},
+                      onRatingChanged: (rating) {
+                        _rating = rating;
+                        setState(() {});
+                      },
                     ),
                   ),
                 ],
               ),
             ),
             MaterialButton(
-              onPressed: () {},
+              onPressed: _submitReview,
               child: Text('Submit'),
               color: Colors.blue,
             ),

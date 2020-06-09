@@ -1,31 +1,77 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/messaging_objects.dart';
 import 'package:hotel_hunter_app/Views/list_widgets.dart';
 import 'package:hotel_hunter_app/Views/text_widgets.dart';
 
 class ConversationPage extends StatefulWidget {
+
   static final String routeName = '/conversation_pageRoute';
 
-  ConversationPage({Key key}) : super(key: key);
+  final Conversation conversation;
+
+  ConversationPage({this.conversation, Key key}) : super(key: key);
 
   @override
   _ConversationPageState createState() => _ConversationPageState();
 }
 
 class _ConversationPageState extends State<ConversationPage> {
+
+  TextEditingController _controller = TextEditingController();
+
+  Conversation _conversation;
+
+  void _sendMessage() {
+    String text = _controller.text;
+    if (text.isEmpty) { return; }
+    this._conversation.addMessageToFirestore(text).whenComplete(() {
+      setState(() {
+        _controller.text = "";
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    this._conversation = widget.conversation;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: AppBarText(text: 'Kevin'),
+        title: AppBarText(text: _conversation.otherContact.getFullName()),
       ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: ListView.builder(
-              itemCount: 3,
-              itemBuilder: (context, index) {
-              return MessageListTile();
-            }),
+            child: StreamBuilder(
+              stream: Firestore.instance.collection('conversations/${this._conversation.id}/messages').orderBy('dateTime'),
+              builder: (context, snapshots) {
+                switch (snapshots.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator());
+                  default:
+                    return ListView.builder(
+                itemCount: snapshots.data.documents.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot snapshot = snapshots.data.documents[index];
+                  Message currentMessage = Message();
+                  currentMessage.getMessageInfoFromFirestore(snapshot);
+                  if (currentMessage.sender.id == AppConstants.currentUser.id) {
+                    currentMessage.sender = AppConstants.currentUser.createContactFromUser();
+                  } else {
+                    currentMessage.sender = this._conversation.otherContact;
+                  }
+                return MessageListTile(message: currentMessage,);
+              },);
+                }
+              },
+            ),
           ),
           Container(
             decoration: BoxDecoration(
@@ -49,11 +95,12 @@ class _ConversationPageState extends State<ConversationPage> {
                     style: TextStyle(
                       fontSize: 20.0,
                     ),
+                    controller: _controller,
                   ),
                 ),
                 Expanded(
                   child: MaterialButton(
-                    onPressed: () {},
+                    onPressed: _sendMessage,
                     child: Text(
                       'Send',
                       style: TextStyle(

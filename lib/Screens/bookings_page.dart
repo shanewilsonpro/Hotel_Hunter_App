@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_hunter_app/Models/app_constants.dart';
+import 'package:hotel_hunter_app/Models/posting_objects.dart';
 import 'package:hotel_hunter_app/Views/calendar_widgets.dart';
 import 'package:hotel_hunter_app/Views/list_widgets.dart';
 
@@ -10,6 +12,37 @@ class BookingsPage extends StatefulWidget {
 }
 
 class _BookingsPageState extends State<BookingsPage> {
+
+  List<DateTime> _bookedDates = [];
+  List<DateTime> _allBookedDates = [];
+  Posting _selectedPosting;
+
+  List<DateTime> _getSelectedDates() {
+    return [];
+  }
+
+  void _selectDate(DateTime date) {}
+
+  void _selectAPosting(Posting posting) {
+    _selectedPosting = posting;
+    this._bookedDates = posting.getAllBookedDates();
+    setState(() {});
+  }
+
+  void _clearSelectedPosting() {
+    this._bookedDates = _allBookedDates;
+    this._selectedPosting = null;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    this._bookedDates = AppConstants.currentUser.getAllBookedDates();
+    this._allBookedDates = AppConstants.currentUser.getAllBookedDates();
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -40,6 +73,9 @@ class _BookingsPageState extends State<BookingsPage> {
                 itemBuilder: (context, index) {
                   return CalendarMonthWidget(
                     monthIndex: index,
+                    bookedDates: this._bookedDates,
+                    selectDate: _selectDate,
+                    getSelectedDates: _getSelectedDates,
                   );
                 },
               ),
@@ -57,7 +93,7 @@ class _BookingsPageState extends State<BookingsPage> {
                     ),
                   ),
                   MaterialButton(
-                    onPressed: () {},
+                    onPressed: _clearSelectedPosting,
                     child: Text(
                       'Reset',
                       style: TextStyle(
@@ -73,21 +109,23 @@ class _BookingsPageState extends State<BookingsPage> {
               padding: const EdgeInsets.only(top: 25.0, bottom: 25.0),
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: 2,
+                itemCount: AppConstants.currentUser.myPostings.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 25.0),
                     child: InkResponse(
-                      onTap: () {},
+                      onTap: () {
+                        _selectAPosting(AppConstants.currentUser.myPostings[index]);
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey,
+                            color: _selectedPosting == AppConstants.currentUser.myPostings[index] ? Colors.yellow : Colors.grey,
                             width: 1.0,
                           ),
                           borderRadius: BorderRadius.circular(5.0),
                         ),
-                        child: MyPostingListTile(),
+                        child: MyPostingListTile(posting: AppConstants.currentUser.myPostings[index],),
                       ),
                     ),
                   );

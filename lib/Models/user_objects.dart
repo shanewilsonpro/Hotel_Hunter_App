@@ -158,8 +158,12 @@ class User extends Contact {
     this.isCurrentlyHosting = isHosting;
   }
 
-  void becomeHost() {
+  Future<void> becomeHost() async {
     this.isHost = true;
+    Map<String,dynamic> data = {
+      'isHost': true,
+    };
+    await Firestore.instance.document('users/${this.id}').updateData(data);
     this.changeCurrentlyHosting(true);
   }
 
@@ -193,8 +197,23 @@ class User extends Contact {
     }
   }
 
-  void makeNewBooking(Booking booking) {
+  Future<void> addBookingToFirestore(Booking booking) async {
+    Map<String,dynamic> data = {
+      'dates': booking.dates,
+      'postingID': booking.posting.id,
+    };
+    await Firestore.instance.document('postings/${this.id}/bookings/${booking.id}').setData(data);
     this.bookings.add(booking);
+    await addBookingConversation(booking);
+  }
+
+  Future<void> addBookingConversation(Booking booking) async {
+    Conversation conversation = Conversation();
+    await conversation.addConversationToFirestore(booking.posting.host);
+    String text = "Hi my name is ${AppConstants.currentUser.firstName} and I have"
+      "just booked ${booking.posting.name} from ${booking.dates.first} to ${booking.dates.last}. "
+      "If you have any question feel free to contact me, otheriwse I look forward to the stay!";
+    await conversation.addMessageToFirestore(text);
   }
 
   List<DateTime> getAllBookedDates() {
@@ -267,14 +286,14 @@ class User extends Contact {
     return rating;
   }
 
-  void postNewReviews(String text, double rating) {
-    Review newReview = Review();
-    newReview.createReview(
-      AppConstants.currentUser.createContactFromUser(),
-      text,
-      rating,
-      DateTime.now(),
-    );
-    this.reviews.add(newReview);
+  Future<void> postNewReviews(String text, double rating) async {
+    Map<String,dynamic> data = {
+      'dateTime': DateTime.now(),
+      'name': AppConstants.currentUser.getFullName(),
+      'rating': rating,
+      'text': text,
+      'userID': AppConstants.currentUser.id,
+    };
+    await Firestore.instance.collection('users/${this.id}/reviews').add(data);
   }
 }
